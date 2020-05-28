@@ -36,7 +36,6 @@ import {
 } from '@uirouter/core';
 import { Ng2ViewConfig } from '../statebuilders/views';
 import { MergeInjector } from '../mergeInjector';
-import { Ng2Component } from '../interface';
 
 /** @hidden */
 let id = 0;
@@ -62,7 +61,7 @@ interface InputMapping {
  * @internalapi
  */
 const ng2ComponentInputs = (factory: ComponentFactory<any>): InputMapping[] => {
-  return factory.inputs.map(input => ({ prop: input.propName, token: input.templateName }));
+  return factory.inputs.map((input) => ({ prop: input.propName, token: input.templateName }));
 };
 
 /**
@@ -173,11 +172,11 @@ export class UIView implements OnInit, OnDestroy {
       config: undefined,
     };
 
-    this._deregisterUiCanExitHook = router.transitionService.onBefore({}, trans => {
+    this._deregisterUiCanExitHook = router.transitionService.onBefore({}, (trans) => {
       return this._invokeUiCanExitHook(trans);
     });
 
-    this._deregisterUiOnParamsChangedHook = router.transitionService.onSuccess({}, trans =>
+    this._deregisterUiOnParamsChangedHook = router.transitionService.onSuccess({}, (trans) =>
       this._invokeUiOnParamsChangedHook(trans)
     );
 
@@ -200,7 +199,7 @@ export class UIView implements OnInit, OnDestroy {
       const state: StateDeclaration = this.state;
 
       if (trans.exiting().indexOf(state) !== -1) {
-        trans.onStart({}, function() {
+        trans.onStart({}, function () {
           return uiCanExitFn.call(instance, trans);
         });
       }
@@ -211,7 +210,7 @@ export class UIView implements OnInit, OnDestroy {
    * For each transition, checks if any param values changed and notify component
    */
   private _invokeUiOnParamsChangedHook($transition$: Transition) {
-    const instance: Ng2Component = this._componentRef && this._componentRef.instance;
+    const instance = this._componentRef && this._componentRef.instance;
     const uiOnParamsChanged: TransitionHookFn = instance && instance.uiOnParamsChanged;
 
     if (isFunction(uiOnParamsChanged)) {
@@ -227,14 +226,8 @@ export class UIView implements OnInit, OnDestroy {
       const toParams: { [paramName: string]: any } = $transition$.params('to');
       const fromParams: { [paramName: string]: any } = $transition$.params('from');
       const getNodeSchema = (node: PathNode) => node.paramSchema;
-      const toSchema: Param[] = $transition$
-        .treeChanges('to')
-        .map(getNodeSchema)
-        .reduce(unnestR, []);
-      const fromSchema: Param[] = $transition$
-        .treeChanges('from')
-        .map(getNodeSchema)
-        .reduce(unnestR, []);
+      const toSchema: Param[] = $transition$.treeChanges('to').map(getNodeSchema).reduce(unnestR, []);
+      const fromSchema: Param[] = $transition$.treeChanges('from').map(getNodeSchema).reduce(unnestR, []);
 
       // Find the to params that have different values than the from params
       const changedToParams = toSchema.filter((param: Param) => {
@@ -244,7 +237,7 @@ export class UIView implements OnInit, OnDestroy {
 
       // Only trigger callback if a to param has changed or is new
       if (changedToParams.length) {
-        const changedKeys: string[] = changedToParams.map(x => x.id);
+        const changedKeys: string[] = changedToParams.map((x) => x.id);
         // Filter the params to only changed/new to params.  `$transition$.params()` may be used to get all params.
         const newValues = filter(toParams, (val, key) => changedKeys.indexOf(key) !== -1);
         instance.uiOnParamsChanged(newValues, $transition$);
@@ -322,10 +315,10 @@ export class UIView implements OnInit, OnDestroy {
     // Map resolves to "useValue: providers"
     const resolvables = context
       .getTokens()
-      .map(token => context.getResolvable(token))
-      .filter(r => r.resolved);
+      .map((token) => context.getResolvable(token))
+      .filter((r) => r.resolved);
 
-    const newProviders = resolvables.map(r => ({ provide: r.token, useValue: context.injector().get(r.token) }));
+    const newProviders = resolvables.map((r) => ({ provide: r.token, useValue: context.injector().get(r.token) }));
 
     const parentInject = { context: this._uiViewData.config.viewDecl.$context, fqn: this._uiViewData.fqn };
     newProviders.push({ provide: UIView.PARENT_INJECT, useValue: parentInject });
@@ -350,7 +343,7 @@ export class UIView implements OnInit, OnDestroy {
     // Returns the actual component property for a renamed an input renamed using `@Input('foo') _foo`.
     // return the `_foo` property
     const renamedInputProp = (prop: string) => {
-      const input = factory.inputs.find(i => i.templateName === prop);
+      const input = factory.inputs.find((i) => i.templateName === prop);
       return (input && input.propName) || prop;
     };
 
@@ -361,7 +354,7 @@ export class UIView implements OnInit, OnDestroy {
     );
 
     // Supply resolve data to matching @Input('prop') or inputs: ['prop']
-    const implicitInputTuples = ng2ComponentInputs(factory).filter(tuple => !inArray(explicitBoundProps, tuple.prop));
+    const implicitInputTuples = ng2ComponentInputs(factory).filter((tuple) => !inArray(explicitBoundProps, tuple.prop));
 
     const addResolvable = (tuple: InputMapping) => ({
       prop: tuple.prop,
@@ -373,8 +366,8 @@ export class UIView implements OnInit, OnDestroy {
     explicitInputTuples
       .concat(implicitInputTuples)
       .map(addResolvable)
-      .filter(tuple => tuple.resolvable && tuple.resolvable.resolved)
-      .forEach(tuple => {
+      .filter((tuple) => tuple.resolvable && tuple.resolvable.resolved)
+      .forEach((tuple) => {
         component[tuple.prop] = injector.get(tuple.resolvable.token);
       });
   }
